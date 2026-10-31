@@ -124,7 +124,7 @@ button.ghost{background:transparent;color:var(--soft);box-shadow:none;padding:8p
 <section id="home" class="panel">
   <h2>开启默契挑战</h2>
   <label class="label" for="name">你的昵称</label>
-  <input id="name" placeholder="输入昵称" maxlength="16" autocomplete="nickname" enterkeyhint="done"/>
+  <input id="name" placeholder="昵称" maxlength="16" autocomplete="nickname" enterkeyhint="done"/>
   <div class="sp"></div>
   <div class="row stack">
     <button id="create">创建房间</button>
@@ -209,6 +209,9 @@ const $ = id => document.getElementById(id);
 const socket = io({ reconnection: true });
 let identity = null, state = null, celebrated = false;
 const key = code => 'tongci:' + code;
+// 固定昵称：开房的是小郭，点邀请链接进来的是小桂。
+const HOST_NAME = '小郭', GUEST_NAME = '小桂';
+const defaultName = () => new URLSearchParams(location.search).get('room') ? GUEST_NAME : HOST_NAME;
 // The seat lives in sessionStorage so each TAB is its own player (two tabs = two people),
 // with localStorage as a fallback that survives closing the tab on your own device.
 function readSeat(code) {
@@ -233,8 +236,7 @@ function link() { return location.origin + location.pathname + '?room=' + identi
 
 function boot() {
   const q = (new URLSearchParams(location.search).get('room') || '').trim().toUpperCase();
-  const savedName = localStorage.getItem('tongci:name');
-  if (savedName) $('name').value = savedName;
+  $('name').value = defaultName();
   if (q) {
     $('joinArea').classList.remove('hidden');
     $('roomCode').value = q;
@@ -249,9 +251,8 @@ function connected(res) {
     error('homeError', (res && res.error) || '连接失败，请重试');
     return;
   }
-  identity = { code: res.code, token: res.token, id: res.id, name: res.name || $('name').value.trim() || '玩家' };
+  identity = { code: res.code, token: res.token, id: res.id, name: res.name || $('name').value.trim() || defaultName() };
   writeSeat(identity);
-  localStorage.setItem('tongci:name', identity.name);
   history.replaceState(null, '', location.pathname + '?room=' + res.code);
   show('home', false); show('game', true);
   error('homeError', '');
@@ -259,8 +260,7 @@ function connected(res) {
 }
 
 $('create').onclick = () => {
-  const name = $('name').value.trim() || '玩家';
-  localStorage.setItem('tongci:name', name);
+  const name = $('name').value.trim() || HOST_NAME;
   $('create').disabled = true;
   socket.emit('create', { name }, res => { $('create').disabled = false; connected(res); });
 };
@@ -268,8 +268,7 @@ $('joinToggle').onclick = () => { $('joinArea').classList.toggle('hidden'); $('r
 function doJoin() {
   const code = $('roomCode').value.trim().toUpperCase();
   if (!/^[0-9A-F]{6}$/.test(code)) return error('homeError', '请输入 6 位房间码');
-  const name = $('name').value.trim() || '玩家';
-  localStorage.setItem('tongci:name', name);
+  const name = $('name').value.trim() || GUEST_NAME;
   const old = readSeat(code);
   $('join').disabled = true;
   socket.emit('join', { code, name, token: old && old.token }, res => { $('join').disabled = false; connected(res); });
