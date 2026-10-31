@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#fff5ef"/>
+<title>同词相见 · 双人默契挑战</title>
+<style>
+:root{
+  --bg:#fff6f0; --card:#fffdfb; --ink:#3d2b2b; --soft:#8a736f; --line:#f1ddd4;
+  --rose:#ef7f8e; --rose-dark:#d9566a; --peach:#ffb48a; --gold:#f2c14e; --mint:#5bc4a0;
+  --shadow:0 10px 30px rgba(190,120,110,.12);
+  font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  min-height:100vh;color:var(--ink);font-size:16px;line-height:1.6;
+  background:
+    radial-gradient(60% 40% at 15% 0%,#ffe3d6 0,transparent 60%),
+    radial-gradient(50% 40% at 95% 20%,#ffe9f0 0,transparent 55%),
+    radial-gradient(60% 50% at 50% 100%,#fff0e0 0,transparent 60%),
+    var(--bg);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:560px;margin:auto;padding:22px 16px 48px}
+header{text-align:center;padding:14px 0 6px}
+.eyebrow{font-size:11px;letter-spacing:.3em;color:var(--rose);font-weight:700}
+h1{font-size:clamp(32px,9vw,46px);margin:8px 0 6px;letter-spacing:.08em;font-weight:800}
+h1 .heart{display:inline-block;color:var(--rose);animation:beat 1.8s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}18%{transform:scale(1.18)}36%{transform:scale(1)}}
+header p{margin:0;color:var(--soft);font-size:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);margin:14px 0}
+h2{font-size:19px;margin:0 0 14px}
+h3{font-size:15px;margin:0 0 10px;color:var(--soft)}
+.label{display:block;font-size:12px;color:var(--soft);margin-bottom:7px;font-weight:600;letter-spacing:.04em}
+input{width:100%;font:inherit;font-size:16px;padding:14px 15px;border:1.5px solid var(--line);border-radius:14px;background:#fffaf7;color:var(--ink);outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus{border-color:var(--rose);box-shadow:0 0 0 4px rgba(239,127,142,.14)}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px 18px;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--rose) 0,var(--peach) 100%);
+  box-shadow:0 6px 16px rgba(239,127,142,.3);transition:transform .12s,box-shadow .12s,opacity .12s}
+button:active{transform:translateY(1px) scale(.99)}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+button.secondary{background:#fff1ea;color:var(--rose-dark);box-shadow:none;border:1.5px solid var(--line)}
+button.ghost{background:transparent;color:var(--soft);box-shadow:none;padding:8px 10px;font-weight:600;font-size:13px}
+.full{width:100%}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.stack{flex-direction:column}
+.muted{color:var(--soft);font-size:14px}
+.tiny{font-size:12px;color:#a8928d}
+.center{text-align:center}
+.hidden{display:none!important}
+.sp{height:14px}
+
+/* room header */
+.roomtop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.code{font-size:30px;font-weight:850;letter-spacing:.16em;color:var(--rose-dark);font-variant-numeric:tabular-nums}
+.share{font-size:12px;color:#b09a95;overflow-wrap:anywhere;margin:12px 0 0}
+.players{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{display:inline-flex;align-items:center;gap:7px;background:#fff2ec;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#d9c6c1;flex:none}
+.dot.on{background:var(--mint);box-shadow:0 0 0 3px rgba(91,196,160,.2)}
+.pill .tick{color:var(--mint);font-weight:800}
+.conn{margin-top:10px;font-size:12px;color:var(--gold);font-weight:600}
+
+/* round block */
+.roundtag{display:inline-block;background:#fff1ea;color:var(--rose-dark);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;letter-spacing:.08em}
+.headline{font-size:23px;font-weight:800;margin:12px 0 6px}
+.instruction{color:var(--soft);font-size:14px;margin:0 0 16px}
+
+/* word cards */
+.wordgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 16px}
+.word{border:1.5px solid var(--line);background:#fffaf7;border-radius:18px;padding:16px 10px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.word .name{font-size:12px;color:var(--soft);font-weight:600}
+.word .value{font-size:clamp(20px,6vw,28px);font-weight:800;margin-top:8px;overflow-wrap:anywhere;line-height:1.25}
+.wordgrid.reveal .word{animation:pop .45s cubic-bezier(.2,1.5,.4,1) both}
+.wordgrid.reveal .word:nth-child(2){animation-delay:.14s}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+.wordgrid.matched .word{border-color:var(--mint);background:#f1fbf7;box-shadow:0 0 0 4px rgba(91,196,160,.14)}
+.prev{background:#fff7f3;border-style:dashed;opacity:.95}
+.prev .value{font-size:clamp(17px,4.6vw,22px)}
+.prevlabel{font-size:12px;color:var(--soft);font-weight:700;margin:0 0 8px}
+
+/* waiting pulse */
+.waitdots{display:inline-flex;gap:5px;margin-left:6px;vertical-align:middle}
+.waitdots i{width:6px;height:6px;border-radius:50%;background:var(--rose);display:block;animation:bounce 1.2s infinite}
+.waitdots i:nth-child(2){animation-delay:.18s}
+.waitdots i:nth-child(3){animation-delay:.36s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+
+/* history */
+.history{display:flex;flex-direction:column;gap:2px}
+.hrow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.hrow:last-child{border-bottom:0}
+.hrow .n{color:var(--soft);font-size:12px;font-weight:700;flex:none;width:44px}
+.hrow .w{flex:1;overflow-wrap:anywhere}
+.hrow .x{color:#d6bdb7;margin:0 6px}
+.hrow.ok{color:var(--mint);font-weight:700}
+
+/* win */
+.win{text-align:center;padding:6px 0 4px}
+.win .big{font-size:clamp(26px,8vw,36px);font-weight:850;color:var(--rose-dark);animation:pop .5s cubic-bezier(.2,1.5,.4,1) both}
+.win .sub{color:var(--soft);font-size:14px;margin-top:6px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.confetti span{position:absolute;top:-24px;font-size:20px;animation:fall linear forwards}
+@keyframes fall{from{transform:translateY(-10vh) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(540deg);opacity:0}}
+
+.error{min-height:20px;font-size:13px;color:var(--rose-dark);margin-top:10px;font-weight:600}
+.rules div{font-size:14px;color:var(--soft);margin:6px 0}
+.rules b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:420px){.panel{padding:17px}.code{font-size:26px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <div class="eyebrow">TWO MINDS · ONE WORD</div>
+  <h1>同词<span class="heart">♥</span>相见</h1>
+  <p>从两个不同的词，走向同一个答案。</p>
+</header>
+
+<section id="home" class="panel">
+  <h2>开启默契挑战</h2>
+  <label class="label" for="name">你的昵称</label>
+  <input id="name" placeholder="输入昵称" maxlength="16" autocomplete="nickname" enterkeyhint="done"/>
+  <div class="sp"></div>
+  <div class="row stack">
+    <button id="create">创建房间</button>
+    <button class="secondary" id="joinToggle">加入对方的房间</button>
+  </div>
+  <div id="joinArea" class="hidden" style="margin-top:16px">
+    <label class="label" for="roomCode">房间码</label>
+    <input id="roomCode" maxlength="6" placeholder="例如 A1B2C3" autocapitalize="characters" autocomplete="off" enterkeyhint="go"/>
+    <div class="sp"></div>
+    <button id="join" class="full">进入房间</button>
+  </div>
+  <div id="homeError" class="error" role="alert"></div>
+</section>
+
+<section id="game" class="hidden">
+  <div class="panel">
+    <div class="roomtop">
+      <div>
+        <div class="label">房间码</div>
+        <div class="code" id="displayCode"></div>
+      </div>
+      <button id="copy" class="secondary" style="flex:none">复制邀请链接</button>
+    </div>
+    <p class="share" id="share"></p>
+    <div class="players" id="players"></div>
+    <div class="conn hidden" id="connection"></div>
+  </div>
+
+  <div class="panel">
+    <span class="roundtag" id="roundLabel">第 1 轮</span>
+    <div class="headline" id="headline"></div>
+    <p class="instruction" id="instruction"></p>
+
+    <div id="prevWrap" class="hidden">
+      <p class="prevlabel">上一轮你们写的是</p>
+      <div class="wordgrid" id="prevGrid"></div>
+    </div>
+
+    <div id="submission" class="hidden">
+      <label class="label" for="wordInput">你的联想词</label>
+      <div class="row">
+        <input id="wordInput" maxlength="30" placeholder="只写一个词" autocomplete="off" enterkeyhint="send"/>
+        <button id="submit" style="flex:none">锁定</button>
+      </div>
+      <p class="tiny" style="margin:10px 0 0">提交后不能修改；双方都提交才会同时揭晓。</p>
+    </div>
+
+    <div id="revealWrap" class="hidden">
+      <div class="wordgrid reveal" id="wordgrid"></div>
+    </div>
+
+    <div id="winWrap" class="win hidden">
+      <div class="big">✨ 同词相见 ✨</div>
+      <div class="sub" id="winSub"></div>
+    </div>
+
+    <button id="next" class="full hidden">进入下一轮 →</button>
+    <div id="restartWrap" class="hidden" style="margin-top:10px"><button id="restart" class="secondary full">再玩一局</button></div>
+    <div id="gameError" class="error" role="alert"></div>
+    <div class="center"><button id="leave" class="ghost">退出房间</button></div>
+  </div>
+
+  <div id="historyPanel" class="panel hidden">
+    <h3>联想轨迹</h3>
+    <div class="history" id="history"></div>
+  </div>
+</section>
+
+<section class="panel rules">
+  <h3>怎么玩</h3>
+  <div><b>①</b> 第一轮，双方各自随意写一个词，不要提前讨论。</div>
+  <div><b>②</b> 两人都提交后，两个词同时揭晓。</div>
+  <div><b>③</b> 下一轮，各自根据刚揭晓的两个词联想一个新词。</div>
+  <div><b>④</b> 直到某一轮两人写出同一个词 —— 同词相见。</div>
+</section>
+<p class="center tiny">房间暂存在服务器内存中，重启或长时间未活动后会消失；请不要输入私人信息。</p>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const socket = io({ reconnection: true });
+let identity = null, state = null, celebrated = false;
+const key = code => 'tongci:' + code;
+// The seat lives in sessionStorage so each TAB is its own player (two tabs = two people),
+// with localStorage as a fallback that survives closing the tab on your own device.
+function readSeat(code) {
+  for (const store of [sessionStorage, localStorage]) {
+    try { const v = JSON.parse(store.getItem(key(code))); if (v && v.token) return v; } catch (e) {}
+  }
+  return null;
+}
+function writeSeat(seat) {
+  for (const store of [sessionStorage, localStorage]) {
+    try { store.setItem(key(seat.code), JSON.stringify(seat)); } catch (e) {}
+  }
+}
+function clearSeat(code) {
+  for (const store of [sessionStorage, localStorage]) { try { store.removeItem(key(code)); } catch (e) {} }
+}
+
+function error(id, text) { $(id).textContent = text || ''; }
+function make(el, cls, txt) { const x = document.createElement(el); if (cls) x.className = cls; if (txt !== undefined) x.textContent = txt; return x; }
+function show(el, on) { $(el).classList.toggle('hidden', !on); }
+function link() { return location.origin + location.pathname + '?room=' + identity.code; }
+
+function boot() {
+  const q = (new URLSearchParams(location.search).get('room') || '').trim().toUpperCase();
+  const savedName = localStorage.getItem('tongci:name');
+  if (savedName) $('name').value = savedName;
+  if (q) {
+    $('joinArea').classList.remove('hidden');
+    $('roomCode').value = q;
+    // Restore this tab's seat if it already has one, so a refresh never costs the slot.
+    identity = readSeat(q);
+  }
+}
+
+function connected(res) {
+  if (!res || !res.ok) {
+    if (identity) { clearSeat(identity.code); identity = null; state = null; show('game', false); show('home', true); }
+    error('homeError', (res && res.error) || '连接失败，请重试');
+    return;
+  }
+  identity = { code: res.code, token: res.token, id: res.id, name: res.name || $('name').value.trim() || '玩家' };
+  writeSeat(identity);
+  localStorage.setItem('tongci:name', identity.name);
+  history.replaceState(null, '', location.pathname + '?room=' + res.code);
+  show('home', false); show('game', true);
+  error('homeError', '');
+  render();
+}
+
+$('create').onclick = () => {
+  const name = $('name').value.trim() || '玩家';
+  localStorage.setItem('tongci:name', name);
+  $('create').disabled = true;
+  socket.emit('create', { name }, res => { $('create').disabled = false; connected(res); });
+};
+$('joinToggle').onclick = () => { $('joinArea').classList.toggle('hidden'); $('roomCode').focus(); };
+function doJoin() {
+  const code = $('roomCode').value.trim().toUpperCase();
+  if (!/^[0-9A-F]{6}$/.test(code)) return error('homeError', '请输入 6 位房间码');
+  const name = $('name').value.trim() || '玩家';
+  localStorage.setItem('tongci:name', name);
+  const old = readSeat(code);
+  $('join').disabled = true;
+  socket.emit('join', { code, name, token: old && old.token }, res => { $('join').disabled = false; connected(res); });
+}
+$('join').onclick = doJoin;
+$('roomCode').onkeydown = e => { if (e.key === 'Enter') doJoin(); };
+$('name').onkeydown = e => { if (e.key === 'Enter' && !$('joinArea').classList.contains('hidden')) doJoin(); };
+
+$('copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(link());
+    $('copy').textContent = '已复制！';
+    setTimeout(() => $('copy').textContent = '复制邀请链接', 1600);
+  } catch (e) { window.prompt('复制以下链接', link()); }
+};
+
+function doSubmit() {
+  const word = $('wordInput').value.trim();
+  if (!word) return error('gameError', '请输入一个词');
+  if ($('submit').disabled) return;
+  $('submit').disabled = true;                       // blocks double-taps before the ack
+  socket.emit('submit', { word, round: state && state.round }, res => {
+    if (!res || !res.ok) { error('gameError', (res && res.error) || '提交失败，请重试'); $('submit').disabled = false; }
+    else { $('wordInput').value = ''; $('wordInput').blur(); error('gameError', ''); }
+  });
+}
+$('submit').onclick = doSubmit;
+$('wordInput').onkeydown = e => { if (e.key === 'Enter') doSubmit(); };
+
+$('next').onclick = () => {
+  $('next').disabled = true;
+  socket.emit('next', { round: state && state.round }, res => {
+    $('next').disabled = false;
+    if (!res || !res.ok) error('gameError', (res && res.error) || '操作失败');
+  });
+};
+$('restart').onclick = () => {
+  if (state && state.phase === 'playing' && !confirm('这一轮还没结束，确定要重新开始吗？')) return;
+  $('restart').disabled = true;
+  socket.emit('restart', {}, res => {
+    $('restart').disabled = false;
+    if (!res || !res.ok) error('gameError', (res && res.error) || '操作失败');
+  });
+};
+$('leave').onclick = () => {
+  if (!confirm('退出房间？对方的位置会空出来。')) return;
+  const code = identity && identity.code;
+  socket.emit('leave', {}, () => {
+    if (code) clearSeat(code);
+    identity = null; state = null; celebrated = false;
+    history.replaceState(null, '', location.pathname);
+    show('game', false); show('home', true); error('homeError', '');
+  });
+};
+
+socket.on('state', s => {
+  if (!identity || identity.code !== s.code) return;
+  const prev = state;
+  if (!prev || prev.round !== s.round) { $('wordInput').value = ''; error('gameError', ''); }
+  if (s.phase !== 'finished') celebrated = false;
+  state = s;
+  render();
+  if (s.phase === 'finished' && !celebrated) { celebrated = true; celebrate(); }
+});
+
+function rejoin() {
+  if (identity) socket.emit('join', { code: identity.code, token: identity.token, name: identity.name }, connected);
+  render();
+}
+socket.on('connect', rejoin);
+socket.on('disconnect', render);
+socket.on('session-replaced', () => {
+  identity = null; state = null;
+  show('game', false); show('home', true);
+  error('homeError', '你已在另一个标签页进入这个房间');
+});
+
+function wordCard(name, value, cls) {
+  const card = make('div', 'word' + (cls ? ' ' + cls : ''));
+  card.append(make('div', 'name', name), make('div', 'value', value));
+  return card;
+}
+
+function render() {
+  if (!identity) return;
+  $('displayCode').textContent = identity.code;
+  $('share').textContent = link();
+  const online = socket.connected;
+  show('connection', !online);
+  $('connection').textContent = '连接中断，正在自动重连…';
+  if (!state) return;
+
+  const me = state.players.find(p => p.id === identity.id);
+  const two = state.players.length === 2;
+  const playing = state.phase === 'playing';
+  const done = !!(me && me.submitted);
+  const last = state.history.length ? state.history[state.history.length - 1] : null;
+
+  $('players').replaceChildren(...state.players.map(p => {
+    const pill = make('span', 'pill');
+    pill.append(make('span', 'dot' + (p.connected ? ' on' : '')));
+    pill.append(document.createTextNode(p.name + (p.id === identity.id ? '（你）' : '')));
+    if (p.submitted) pill.append(make('span', 'tick', '✓ 已锁定'));
+    else if (!p.connected) pill.append(make('span', 'tiny', '离线'));
+    return pill;
+  }));
+  if (!two) {
+    const ghost = make('span', 'pill');
+    ghost.append(make('span', 'dot'), document.createTextNode('等待对方加入'));
+    $('players').append(ghost);
+  }
+
+  $('roundLabel').textContent = '第 ' + state.round + ' 轮';
+  show('submission', playing && !done);
+  $('submit').disabled = !online || !playing || done;
+  $('wordInput').disabled = !online || !playing || done;
+
+  const showResults = state.phase === 'reveal' || state.phase === 'finished';
+  show('revealWrap', showResults && !!last);
+  show('winWrap', state.phase === 'finished');
+  show('next', state.phase === 'reveal');
+  show('restartWrap', state.phase === 'finished' || (state.history.length > 0 && state.phase !== 'reveal'));
+  // While typing round N>1, keep the previous round's two words in view — the rules need them.
+  show('prevWrap', playing && !!last);
+  if (playing && last) {
+    $('prevGrid').replaceChildren(...state.players.map((p, i) => wordCard(p.name, last.words[i], 'prev')));
+  }
+
+  if (state.phase === 'waiting') {
+    $('headline').textContent = '等待另一位玩家加入';
+    $('instruction').textContent = '把上面的邀请链接发给对方，Ta 点开就能进来。';
+  } else if (state.phase === 'finished') {
+    $('headline').textContent = '你们想到一起了！';
+    $('instruction').textContent = '';
+    $('winSub').textContent = '第 ' + state.round + ' 轮，你们写下了同一个词：' + (last ? last.words[0] : '');
+  } else if (state.phase === 'reveal') {
+    $('headline').textContent = '本轮答案揭晓';
+    $('instruction').textContent = '还不一样。看看这两个词，下一轮继续靠近。';
+  } else if (done) {
+    $('headline').innerHTML = '已锁定，等待对方<span class="waitdots"><i></i><i></i><i></i></span>';
+    $('instruction').textContent = '双方都提交后，答案才会同时揭晓。';
+  } else {
+    $('headline').textContent = state.round === 1 ? '写下你的第一个词' : '你想到了什么？';
+    $('instruction').textContent = state.round === 1
+      ? '不用参考任何提示，随意写一个词。'
+      : '根据上一轮的两个词，写出你联想到的词。';
+  }
+
+  if (showResults && last) {
+    $('wordgrid').className = 'wordgrid reveal' + (last.match ? ' matched' : '');
+    $('wordgrid').replaceChildren(...state.players.map((p, i) => wordCard(p.name, last.words[i])));
+  }
+
+  show('historyPanel', state.history.length > 0);
+  $('history').replaceChildren(...state.history.map(h => {
+    const row = make('div', 'hrow' + (h.match ? ' ok' : ''));
+    row.append(make('span', 'n', '第' + h.round + '轮'), make('span', 'w', h.words[0]), make('span', 'x', '×'), make('span', 'w', h.words[1]));
+    if (h.match) row.append(make('span', '', '✓'));
+    return row;
+  }));
+}
+
+function celebrate() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const layer = make('div', 'confetti');
+  const glyphs = ['♥', '✨', '🎉', '💞', '⭐', '🌸'];
+  for (let i = 0; i < 36; i++) {
+    const s = make('span', '', glyphs[i % glyphs.length]);
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.animationDuration = (1.8 + Math.random() * 1.6) + 's';
+    s.style.animationDelay = (Math.random() * 0.6) + 's';
+    s.style.fontSize = (14 + Math.random() * 18) + 'px';
+    layer.append(s);
+  }
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 4200);
+}
+
+boot();
+</script>
+</body>
+</html>
